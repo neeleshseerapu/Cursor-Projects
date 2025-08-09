@@ -24,6 +24,8 @@ A modern, responsive todo application specifically designed for UCLA students wi
 ### 🚀 Advanced Features
 
 - **Local Storage**: Tasks persist between browser sessions
+- **External JSON Database Support**: Connect to external JSON databases
+- **Multi-User Support**: Switch between different users
 - **Keyboard Shortcuts**:
   - `Ctrl/Cmd + Enter`: Add new task
   - `Escape`: Clear input field
@@ -37,13 +39,15 @@ A modern, responsive todo application specifically designed for UCLA students wi
 ### Prerequisites
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- No additional software required
+- Node.js (for server features)
+- No additional software required for basic usage
 
 ### Installation
 
 1. Clone or download this repository
-2. Open `index.html` in your web browser
-3. Start organizing your tasks!
+2. Install dependencies: `npm install`
+3. Start the server: `npm start`
+4. Open `http://localhost:3001` in your web browser
 
 ### Usage
 
@@ -64,19 +68,86 @@ A modern, responsive todo application specifically designed for UCLA students wi
 - **Filter**: Use the filter buttons (All, Active, Completed) to view specific tasks
 - **Sort**: Use the dropdown to sort by Date, Priority, or Alphabetically
 
-#### Keyboard Shortcuts
+#### User Management
 
-- `Ctrl/Cmd + Enter`: Add new task
-- `Escape`: Clear input field
-- `Enter`: Submit form (when input is focused)
+- **Switch Users**: Enter a username and click "Switch" to change users
+- **User-Specific Data**: Each user has their own todo list
+
+## External JSON Database Support
+
+The app supports connecting to external JSON databases for enhanced data persistence and sharing.
+
+### Configuration
+
+Set these environment variables to connect to an external JSON database:
+
+```bash
+# External JSON database URL
+EXTERNAL_DB_URL=https://your-json-db-api.com
+
+# API key for authentication (if required)
+EXTERNAL_DB_API_KEY=your-api-key-here
+```
+
+### Supported External JSON Databases
+
+The app is compatible with any JSON database that supports these REST endpoints:
+
+#### Required API Endpoints
+
+1. **GET** `/users/{username}/todos`
+
+   - Returns: Array of todo objects
+   - Headers: `Authorization: Bearer {api-key}` (optional)
+
+2. **PUT** `/users/{username}/todos`
+   - Body: Array of todo objects
+   - Headers: `Authorization: Bearer {api-key}` (optional)
+   - Returns: `{ "ok": true, "count": number }`
+
+#### Example External Database Services
+
+- **JSONBin.io**: `https://api.jsonbin.io/v3/b/{bin-id}`
+- **JSON Server**: `https://your-json-server.herokuapp.com`
+- **Supabase**: `https://your-project.supabase.co/rest/v1`
+- **Firebase**: `https://your-project.firebaseio.com`
+- **Custom API**: Any REST API that follows the above pattern
+
+### Fallback Behavior
+
+- **Primary**: External JSON database (if configured)
+- **Fallback**: Local JSON files in `data/` directory
+- **Offline**: Browser localStorage
+
+### Example Configuration
+
+```bash
+# For JSONBin.io
+EXTERNAL_DB_URL=https://api.jsonbin.io/v3/b/your-bin-id
+EXTERNAL_DB_API_KEY=your-jsonbin-api-key
+
+# For custom API
+EXTERNAL_DB_URL=https://your-api.com/api
+EXTERNAL_DB_API_KEY=your-api-key
+
+# Start the server
+npm start
+```
 
 ## File Structure
 
 ```
 todo/
-├── index.html          # Main HTML file
-├── styles.css          # UCLA-themed CSS styles
-├── script.js           # JavaScript functionality
+├── public/              # Frontend files
+│   ├── index.html       # Main HTML file
+│   ├── styles.css       # UCLA-themed CSS styles
+│   ├── script.js        # JavaScript functionality
+│   └── manifest.json    # PWA manifest
+├── data/                # Local JSON storage
+│   ├── bruin.json       # User data files
+│   └── ...
+├── server.js            # Express server
+├── package.json         # Dependencies
 └── README.md           # This documentation
 ```
 
@@ -96,14 +167,20 @@ This app uses the official UCLA colors:
 - Safari 12+
 - Edge 79+
 
-## Local Storage
+## Data Storage
 
-The app uses browser local storage to save your todos. This means:
+The app uses a multi-tier storage approach:
 
-- Your tasks persist between browser sessions
-- Data is stored locally on your device
-- No internet connection required after initial load
-- Data is not shared with any external servers
+1. **External JSON Database** (if configured): Primary storage for multi-user data
+2. **Local JSON Files**: Fallback storage in `data/` directory
+3. **Browser localStorage**: Offline/fallback storage for individual users
+
+### Data Persistence
+
+- **Multi-user support**: Each user has their own data file
+- **Cross-device sync**: When using external JSON database
+- **Offline capability**: Works without internet connection
+- **Data backup**: Export/import functionality
 
 ## Contributing
 
@@ -115,6 +192,7 @@ Feel free to contribute to this project! Some ideas for improvements:
 - Create task templates for common student activities
 - Add calendar integration
 - Implement task sharing between users
+- Add real-time collaboration features
 
 ## License
 
