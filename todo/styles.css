@@ -217,10 +217,27 @@ body {
   border-color: var(--ucla-blue);
 }
 
-/* Filters Section */
-.filters-section {
+/* New: deadline selector */
+.deadline-selector {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.due-date-input {
+  padding: 8px 12px;
+  border: 2px solid var(--light-gray);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+/*********************/
+/* Filters Section   */
+/*********************/
+.filters-section {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
   align-items: center;
   margin-bottom: 25px;
   padding: 20px 0;
@@ -247,6 +264,16 @@ body {
 .filter-btn:hover {
   background: var(--ucla-blue);
   color: var(--white);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  justify-self: end;
+}
+
+.sort-options {
+  justify-self: end;
 }
 
 .sort-select {
@@ -345,6 +372,18 @@ body {
   color: var(--gray);
 }
 
+/* New: due date styles */
+.todo-due {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.todo-due.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
 .todo-date {
   display: flex;
   align-items: center;
@@ -397,6 +436,79 @@ body {
 .action-btn.delete:hover {
   background: rgba(220, 53, 69, 0.1);
   color: var(--danger);
+}
+
+/* Calendar View */
+.calendar-container {
+  background: var(--white);
+  border: 2px solid var(--light-gray);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 30px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.calendar-month-label {
+  font-weight: 700;
+  color: var(--ucla-blue);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+/* New: weekday header cells */
+.calendar-weekday {
+  text-align: center;
+  font-weight: 700;
+  color: var(--ucla-blue);
+}
+
+.calendar-cell {
+  border: 2px solid var(--light-gray);
+  border-radius: 10px;
+  min-height: 100px;
+  padding: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.1s ease;
+}
+
+.calendar-cell:hover {
+  border-color: var(--ucla-blue);
+}
+
+.calendar-cell .date-number {
+  font-weight: 600;
+  color: var(--dark-gray);
+}
+
+.calendar-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  color: var(--white);
+  background: var(--ucla-blue);
+}
+
+.calendar-cell.today {
+  box-shadow: inset 0 0 0 2px var(--ucla-gold);
+}
+
+.calendar-day-details {
+  margin-top: 16px;
+  border-top: 2px solid var(--light-gray);
+  padding-top: 12px;
 }
 
 /* Empty State */
@@ -541,9 +653,7 @@ body {
   }
 
   .filters-section {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
+    grid-template-columns: 1fr;
   }
 
   .filter-buttons {
@@ -626,4 +736,135 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ucla-dark-blue);
+}
+
+/* Professional refinements (UCLA touch) */
+/* Segmented toggle for view buttons */
+.view-toggle {
+  background: var(--light-gray);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.view-toggle .filter-btn {
+  border: none;
+  background: transparent;
+  color: var(--ucla-blue);
+  border-radius: 10px;
+  padding: 8px 12px;
+  min-width: 42px;
+}
+.view-toggle .filter-btn.active {
+  background: var(--ucla-blue);
+  color: var(--white);
+  box-shadow: 0 4px 10px rgba(39,116,174,0.25);
+}
+
+/* Inputs and selects: enhanced focus */
+.todo-input,
+.priority-select,
+.due-date-input,
+.sort-select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.todo-input:focus,
+.priority-select:focus,
+.due-date-input:focus,
+.sort-select:focus {
+  outline: none;
+  border-color: var(--ucla-blue);
+  box-shadow: 0 0 0 4px rgba(39, 116, 174, 0.12);
+}
+
+/* Buttons: polish */
+.filter-btn {
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.05s ease;
+}
+.filter-btn:active {
+  transform: translateY(1px);
+}
+.add-btn {
+  box-shadow: 0 6px 16px rgba(39,116,174,0.25);
+}
+.add-btn:active {
+  transform: translateY(1px);
+}
+
+/* Todo item: priority accent bar */
+.todo-item {
+  border-radius: 14px;
+}
+.todo-item:has(.todo-priority.high) { border-left: 6px solid var(--danger); }
+.todo-item:has(.todo-priority.medium) { border-left: 6px solid var(--warning); }
+.todo-item:has(.todo-priority.low) { border-left: 6px solid var(--success); }
+
+/* Checkbox: subtle feedback */
+.todo-checkbox {
+  width: 22px;
+  height: 22px;
+}
+.todo-checkbox.checked {
+  box-shadow: 0 0 0 3px rgba(39,116,174,0.12);
+}
+
+/* Action buttons: hover polish */
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Calendar polish */
+.calendar-container {
+  box-shadow: var(--shadow);
+}
+.calendar-header {
+  padding: 4px 2px;
+}
+.calendar-month-label {
+  font-size: 1.05rem;
+}
+.calendar-weekday {
+  padding: 8px 0;
+  background: #f4f7fb;
+  border-radius: 8px;
+}
+.calendar-cell {
+  background: #fff;
+}
+.calendar-cell.empty {
+  background: #f9fbff;
+}
+.calendar-cell .date-number {
+  color: var(--dark-gray);
+  font-size: 0.95rem;
+}
+.calendar-cell .calendar-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: linear-gradient(135deg, var(--ucla-blue), var(--ucla-dark-blue));
+}
+.calendar-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+.calendar-cell.today {
+  background: linear-gradient(0deg, rgba(255,209,0,0.08), rgba(255,209,0,0.08)), #fff;
+}
+
+/* Stats: subtle card polish */
+.stats-section {
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.03);
+}
+.stat-number {
+  letter-spacing: 0.5px;
+}
+
+/* Header polish */
+.header {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+/* Empty state polish */
+.empty-state {
+  background: linear-gradient(180deg, #fbfdff 0%, #f6f9ff 100%);
 }
