@@ -7,7 +7,7 @@ import lockfile from 'proper-lockfile';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const DATA_DIR = path.resolve('/workspace/data');
+const DATA_DIR = path.resolve(process.cwd(), 'data');
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });

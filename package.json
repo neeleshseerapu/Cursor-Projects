@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {
@@ -11,5 +12,8 @@
     "express": "^4.19.2",
     "morgan": "^1.10.0",
     "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.17.1"
   }
 }
