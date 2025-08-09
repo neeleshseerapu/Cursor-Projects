@@ -9,7 +9,6 @@
       content="A UCLA-themed todo app for students to stay organized"
     />
     <meta name="theme-color" content="#2774AE" />
-    <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="styles.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
@@ -37,8 +36,15 @@
             <span id="current-user-badge">bruin</span>
           </div>
           <div class="user-switcher">
-            <input type="text" id="username-input" class="username-input" placeholder="Enter username" />
-            <button id="switch-user-btn" class="filter-btn" title="Switch user">Switch</button>
+            <input
+              type="text"
+              id="username-input"
+              class="username-input"
+              placeholder="Enter username"
+            />
+            <button id="switch-user-btn" class="filter-btn" title="Switch user">
+              Switch
+            </button>
           </div>
         </div>
       </header>
@@ -70,7 +76,11 @@
               </div>
               <div class="deadline-selector">
                 <label for="due-date">Due:</label>
-                <input type="datetime-local" id="due-date" class="due-date-input" />
+                <input
+                  type="datetime-local"
+                  id="due-date"
+                  class="due-date-input"
+                />
               </div>
             </form>
           </div>
@@ -84,10 +94,18 @@
               </button>
             </div>
             <div class="view-toggle">
-              <button id="view-list-btn" class="filter-btn active" title="List view">
+              <button
+                id="view-list-btn"
+                class="filter-btn active"
+                title="List view"
+              >
                 <i class="fas fa-list"></i>
               </button>
-              <button id="view-calendar-btn" class="filter-btn" title="Calendar view">
+              <button
+                id="view-calendar-btn"
+                class="filter-btn"
+                title="Calendar view"
+              >
                 <i class="fas fa-calendar"></i>
               </button>
             </div>
@@ -107,12 +125,22 @@
             </ul>
           </div>
 
-          <div class="calendar-container" id="calendar-container" style="display: none;">
+          <div
+            class="calendar-container"
+            id="calendar-container"
+            style="display: none"
+          >
             <div class="calendar-header">
-              <button id="calendar-prev" class="filter-btn" title="Previous month">
+              <button
+                id="calendar-prev"
+                class="filter-btn"
+                title="Previous month"
+              >
                 <i class="fas fa-chevron-left"></i>
               </button>
-              <div id="calendar-month-label" class="calendar-month-label">Month YYYY</div>
+              <div id="calendar-month-label" class="calendar-month-label">
+                Month YYYY
+              </div>
               <button id="calendar-next" class="filter-btn" title="Next month">
                 <i class="fas fa-chevron-right"></i>
               </button>

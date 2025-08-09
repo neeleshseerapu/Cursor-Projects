@@ -25,6 +25,7 @@ This starts on `http://localhost:3001`.
 - PUT `/api/users/:username/todos` with JSON body `[Todo]` → persisted
 
 Notes:
+
 - Each user is stored at `data/:username.json`.
 - No auth. Username is case-sensitive.
 

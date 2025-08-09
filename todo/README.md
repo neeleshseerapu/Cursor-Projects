@@ -49,6 +49,36 @@ A modern, responsive todo application specifically designed for UCLA students wi
 3. Start the server: `npm start`
 4. Open `http://localhost:3001` in your web browser
 
+### Quick Start Options
+
+**Option 1: Start server only**
+
+```bash
+npm start
+# Then manually open http://localhost:3001 in your browser
+```
+
+**Option 2: Start server and open browser automatically (Recommended)**
+
+```bash
+npm run start:open
+# This will start the server and automatically open your browser
+```
+
+**Option 3: Start server and open browser (Alternative)**
+
+```bash
+npm run start:auto
+# This uses a shell script for cross-platform compatibility
+```
+
+**Option 4: Development mode**
+
+```bash
+npm run dev
+# Same as npm start, but with development logging
+```
+
 ### Usage
 
 #### Adding Tasks
@@ -141,8 +171,7 @@ todo/
 ├── public/              # Frontend files
 │   ├── index.html       # Main HTML file
 │   ├── styles.css       # UCLA-themed CSS styles
-│   ├── script.js        # JavaScript functionality
-│   └── manifest.json    # PWA manifest
+│   └── script.js        # JavaScript functionality
 ├── data/                # Local JSON storage
 │   ├── bruin.json       # User data files
 │   └── ...

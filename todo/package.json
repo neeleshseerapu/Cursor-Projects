@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "start:open": "node start-with-browser.js",
+    "start:auto": "./start-app.sh"
   },
   "dependencies": {
     "cors": "^2.8.5",
