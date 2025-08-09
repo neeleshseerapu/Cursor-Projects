@@ -688,6 +688,9 @@ body {
     left: 10px;
     max-width: none;
   }
+  .user-controls {
+    flex-direction: column;
+  }
 }
 
 /* Animations */
@@ -867,4 +870,37 @@ body {
 /* Empty state polish */
 .empty-state {
   background: linear-gradient(180deg, #fbfdff 0%, #f6f9ff 100%);
+}
+
+.user-controls {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.current-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(39,116,174,0.08);
+  color: var(--ucla-blue);
+  border: 1px solid rgba(39,116,174,0.18);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.username-input {
+  padding: 8px 12px;
+  border: 2px solid var(--light-gray);
+  border-radius: 10px;
+  min-width: 220px;
+}
+.username-input:focus {
+  border-color: var(--ucla-blue);
+  box-shadow: 0 0 0 3px rgba(39,116,174,0.12);
+  outline: none;
+}
+.user-switcher .filter-btn {
+  border-radius: 10px;
 }

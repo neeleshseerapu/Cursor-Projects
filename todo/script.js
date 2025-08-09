@@ -1,7 +1,9 @@
 // UCLA Todo App - JavaScript
 class UCLATodoApp {
     constructor() {
-        this.todos = JSON.parse(localStorage.getItem('ucla-todos')) || [];
+        this.apiBaseUrl = 'http://localhost:3001';
+        this.username = localStorage.getItem('ucla-username') || 'bruin';
+        this.todos = JSON.parse(localStorage.getItem(this.getLocalKey())) || [];
         this.currentFilter = 'all';
         this.currentSort = 'date';
         this.currentView = 'list';
@@ -9,9 +11,12 @@ class UCLATodoApp {
         
         this.initializeElements();
         this.bindEvents();
-        this.renderTodos();
-        this.renderCalendar();
-        this.updateStats();
+        this.updateUserBadge();
+        this.loadTodosFromServer().finally(() => {
+            this.renderTodos();
+            this.renderCalendar();
+            this.updateStats();
+        });
     }
 
     initializeElements() {
@@ -37,6 +42,10 @@ class UCLATodoApp {
         this.calendarPrevBtn = document.getElementById('calendar-prev');
         this.calendarNextBtn = document.getElementById('calendar-next');
         this.calendarDayDetails = document.getElementById('calendar-day-details');
+        // User controls
+        this.usernameInput = document.getElementById('username-input');
+        this.switchUserBtn = document.getElementById('switch-user-btn');
+        this.currentUserBadge = document.getElementById('current-user-badge');
     }
 
     bindEvents() {
@@ -82,6 +91,19 @@ class UCLATodoApp {
                 this.renderCalendar();
             });
         }
+
+        // User switching
+        if (this.switchUserBtn) {
+            this.switchUserBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const name = (this.usernameInput?.value || '').trim();
+                if (!name) {
+                    this.showNotification('Please enter a username', 'warning');
+                    return;
+                }
+                await this.switchUser(name);
+            });
+        }
     }
 
     handleSubmit(e) {
@@ -109,6 +131,7 @@ class UCLATodoApp {
         
         this.todos.unshift(todo);
         this.saveTodos();
+        this.syncToServer();
         this.renderTodos();
         this.renderCalendar();
         this.updateStats();
@@ -147,6 +170,7 @@ class UCLATodoApp {
             todo.completed = !todo.completed;
             todo.completedAt = todo.completed ? new Date().toISOString() : null;
             this.saveTodos();
+            this.syncToServer();
             this.renderTodos();
             this.renderCalendar();
             this.updateStats();
@@ -161,6 +185,7 @@ class UCLATodoApp {
         if (todo) {
             this.todos = this.todos.filter(t => t.id !== id);
             this.saveTodos();
+            this.syncToServer();
             this.renderTodos();
             this.renderCalendar();
             this.updateStats();
@@ -232,6 +257,7 @@ class UCLATodoApp {
             todo.completed = newCompleted;
             todo.completedAt = newCompleted ? (todo.completedAt || new Date().toISOString()) : null;
             this.saveTodos();
+            this.syncToServer();
             this.renderTodos();
             this.renderCalendar();
             this.updateStats();
@@ -361,7 +387,7 @@ class UCLATodoApp {
     }
 
     saveTodos() {
-        localStorage.setItem('ucla-todos', JSON.stringify(this.todos));
+        localStorage.setItem(this.getLocalKey(), JSON.stringify(this.todos));
     }
 
     clearFilter() {
@@ -461,7 +487,7 @@ class UCLATodoApp {
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `ucla-todos-${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `${this.username}-todos-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
     }
@@ -481,6 +507,7 @@ class UCLATodoApp {
                         if (Array.isArray(importedTodos)) {
                             this.todos = importedTodos;
                             this.saveTodos();
+                            this.syncToServer();
                             this.renderTodos();
                             this.renderCalendar();
                             this.updateStats();
@@ -631,6 +658,61 @@ class UCLATodoApp {
             return null;
         }
     }
+
+    // -------- User & Server Methods --------
+    getLocalKey() {
+        return `ucla-todos-${this.username}`;
+    }
+
+    updateUserBadge() {
+        if (this.currentUserBadge) {
+            this.currentUserBadge.textContent = this.username;
+        }
+        if (this.usernameInput) this.usernameInput.value = this.username;
+    }
+
+    async switchUser(newUsername) {
+        this.username = newUsername;
+        localStorage.setItem('ucla-username', this.username);
+        this.updateUserBadge();
+        // Load from cache first
+        this.todos = JSON.parse(localStorage.getItem(this.getLocalKey())) || [];
+        this.renderTodos();
+        this.renderCalendar();
+        this.updateStats();
+        // Fetch from server to refresh
+        await this.loadTodosFromServer();
+        this.renderTodos();
+        this.renderCalendar();
+        this.updateStats();
+        this.showNotification(`Switched user to ${this.username}`, 'success');
+    }
+
+    async loadTodosFromServer() {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/api/users/${encodeURIComponent(this.username)}/todos`, { cache: 'no-store' });
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                this.todos = data;
+                this.saveTodos();
+            }
+        } catch (e) {
+            console.warn('Using cached todos due to server error or offline.', e);
+        }
+    }
+
+    async syncToServer() {
+        try {
+            await fetch(`${this.apiBaseUrl}/api/users/${encodeURIComponent(this.username)}/todos`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.todos)
+            });
+        } catch (e) {
+            console.warn('Sync to server failed; will remain in local cache.', e);
+        }
+    }
 }
 
 // Initialize the app when DOM is loaded
@@ -671,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         app.todos = sampleTodos;
         app.saveTodos();
+        app.syncToServer();
         app.renderTodos();
         app.renderCalendar();
         app.updateStats();
