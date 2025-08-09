@@ -11,3 +11,8 @@
 127.0.0.1 - - [09/Aug/2025 04:14:44] "GET /script.js HTTP/1.1" 304 -
 127.0.0.1 - - [09/Aug/2025 04:14:44] code 404, message File not found
 127.0.0.1 - - [09/Aug/2025 04:14:44] "GET /sw.js HTTP/1.1" 404 -
+127.0.0.1 - - [09/Aug/2025 04:21:54] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [09/Aug/2025 04:21:55] "GET /styles.css HTTP/1.1" 304 -
+127.0.0.1 - - [09/Aug/2025 04:21:55] "GET /script.js HTTP/1.1" 304 -
+127.0.0.1 - - [09/Aug/2025 04:21:55] code 404, message File not found
+127.0.0.1 - - [09/Aug/2025 04:21:55] "GET /sw.js HTTP/1.1" 404 -

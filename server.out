@@ -1,2 +1,5 @@
 UCLA Todo server listening on http://localhost:3001
 [0mGET /api/health [32m200[0m 1.604 ms - 11[0m
+[0mGET /api/users/Anirudh/todos [32m200[0m 1.554 ms - 182[0m
+[0mGET /api/users/Anirudh/todos [32m200[0m 1.794 ms - 182[0m
+[0mGET /api/users/Neelesh/todos [32m200[0m 1.570 ms - 374[0m
