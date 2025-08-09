@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1754712673623,
+    "text": "Welcome to UCLA Student Todo! 🐻",
+    "priority": "high",
+    "completed": false,
+    "createdAt": "2025-08-09T04:11:13.622Z",
+    "completedAt": null,
+    "dueDate": null
+  },
+  {
+    "id": 1754712673624,
+    "text": "Add your first task using the input above",
+    "priority": "medium",
+    "completed": false,
+    "createdAt": "2025-08-09T04:11:13.622Z",
+    "completedAt": null,
+    "dueDate": null
+  },
+  {
+    "id": 1754712673625,
+    "text": "Check off tasks by clicking the checkbox",
+    "priority": "low",
+    "completed": false,
+    "createdAt": "2025-08-09T04:11:13.622Z",
+    "completedAt": null,
+    "dueDate": null
+  }
+]

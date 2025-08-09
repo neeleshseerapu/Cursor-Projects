@@ -1,2 +1,19 @@
 UCLA Todo server listening on http://localhost:3001
 [0mGET /api/health [32m200[0m 1.551 ms - 11[0m
+[0mPUT /api/users/bruin/todos [32m200[0m 3.885 ms - 21[0m
+[0mGET /api/users/bruin/todos [32m200[0m 1.818 ms - 537[0m
+[0mGET /api/users/Neelesh/todos [32m200[0m 1.091 ms - 2[0m
+[0mPUT /api/users/Neelesh/todos [32m200[0m 3.426 ms - 21[0m
+[0mPUT /api/users/Neelesh/todos [32m200[0m 2.717 ms - 21[0m
+[0mPUT /api/users/Neelesh/todos [32m200[0m 3.051 ms - 21[0m
+[0mPUT /api/users/Neelesh/todos [32m200[0m 3.082 ms - 21[0m
+[0mGET /api/users/Neelesh/todos [32m200[0m 1.952 ms - 374[0m
+[0mGET /api/users/Sigma/todos [32m200[0m 0.554 ms - 2[0m
+[0mGET /api/users/Neelesh/todos [32m200[0m 1.457 ms - 374[0m
+[0mGET /api/users/Sigma/todos [32m200[0m 0.922 ms - 2[0m
+[0mGET /api/users/Ryan/todos [32m200[0m 0.882 ms - 2[0m
+[0mGET /api/users/Neelesh/todos [32m200[0m 2.105 ms - 374[0m
+[0mGET /api/users/Neelesh/todos [32m200[0m 1.620 ms - 374[0m
+[0mGET /api/users/Anirudh/todos [32m200[0m 0.937 ms - 2[0m
+[0mPUT /api/users/Anirudh/todos [32m200[0m 2.148 ms - 21[0m
+[0mPUT /api/users/Anirudh/todos [32m200[0m 2.401 ms - 21[0m

@@ -1,0 +1,13 @@
+127.0.0.1 - - [09/Aug/2025 04:11:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Aug/2025 04:11:12] "GET /styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Aug/2025 04:11:13] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [09/Aug/2025 04:11:13] code 404, message File not found
+127.0.0.1 - - [09/Aug/2025 04:11:13] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [09/Aug/2025 04:11:13] "GET /manifest.json HTTP/1.1" 200 -
+127.0.0.1 - - [09/Aug/2025 04:11:13] code 404, message File not found
+127.0.0.1 - - [09/Aug/2025 04:11:13] "GET /sw.js HTTP/1.1" 404 -
+127.0.0.1 - - [09/Aug/2025 04:14:43] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [09/Aug/2025 04:14:43] "GET /styles.css HTTP/1.1" 304 -
+127.0.0.1 - - [09/Aug/2025 04:14:44] "GET /script.js HTTP/1.1" 304 -
+127.0.0.1 - - [09/Aug/2025 04:14:44] code 404, message File not found
+127.0.0.1 - - [09/Aug/2025 04:14:44] "GET /sw.js HTTP/1.1" 404 -
