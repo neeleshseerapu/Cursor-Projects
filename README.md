@@ -1,31 +1,33 @@
-# AI-Powered Projects with Cursor
+# Local UCLA Todo Server
 
-Welcome to my GitHub repository! 👋
+Run a local Node server that stores todos per-username as JSON files under `data/`.
 
-This repository is a collection of projects that I have created using [Cursor](https://www.cursor.so/), an AI-powered coding tool. Here, you'll find experiments, prototypes, and full-fledged applications that showcase how AI can accelerate and enhance the software development process.
+## Quick start
 
-## About
+1. Install deps
 
-- **Purpose:** Demonstrate the capabilities of AI-assisted coding using Cursor.
-- **Contents:** Projects, code snippets, and experiments built with the help of Cursor's AI features.
-- **Audience:** Anyone interested in AI-driven development, Cursor users, and curious developers.
+```
+cd /workspace
+npm install
+```
 
-## Why Cursor?
+2. Start the server
 
-Cursor's AI coding capabilities help me:
+```
+npm run dev
+```
 
-- Generate code faster and more efficiently
-- Explore new ideas with rapid prototyping
-- Learn and adopt best practices suggested by AI
+This starts on `http://localhost:3001`.
 
-## Projects
+## API
 
-Browse the repository to see various projects, each with its own README and documentation. Feel free to explore, fork, or contribute!
+- GET `/api/users/:username/todos` → `[Todo]`
+- PUT `/api/users/:username/todos` with JSON body `[Todo]` → persisted
 
-## Feedback
+Notes:
+- Each user is stored at `data/:username.json`.
+- No auth. Username is case-sensitive.
 
-If you have suggestions or want to collaborate, please open an issue or submit a pull request.
+## Frontend
 
----
-
-_This repository is a testament to the power of AI in modern software development. All code here was created with significant assistance from Cursor's AI, including this README file (except this little line lol!)_
+Open `todo/index.html` in a browser. Use the user switcher in the header to choose a username.
