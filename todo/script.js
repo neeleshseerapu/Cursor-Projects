@@ -4,10 +4,13 @@ class UCLATodoApp {
         this.todos = JSON.parse(localStorage.getItem('ucla-todos')) || [];
         this.currentFilter = 'all';
         this.currentSort = 'date';
+        this.currentView = 'list';
+        this.currentMonth = new Date();
         
         this.initializeElements();
         this.bindEvents();
         this.renderTodos();
+        this.renderCalendar();
         this.updateStats();
     }
 
@@ -15,14 +18,25 @@ class UCLATodoApp {
         this.todoForm = document.getElementById('todo-form');
         this.todoInput = document.getElementById('todo-input');
         this.prioritySelect = document.getElementById('priority');
+        this.dueDateInput = document.getElementById('due-date');
         this.todoList = document.getElementById('todo-list');
-        this.filterButtons = document.querySelectorAll('.filter-btn');
+        this.filterButtons = document.querySelectorAll('.filter-btn[data-filter]');
         this.sortSelect = document.getElementById('sort-select');
         this.statsElements = {
             total: document.getElementById('total-todos'),
             completed: document.getElementById('completed-todos'),
             pending: document.getElementById('pending-todos')
         };
+        // View toggle & calendar elements
+        this.viewListBtn = document.getElementById('view-list-btn');
+        this.viewCalendarBtn = document.getElementById('view-calendar-btn');
+        this.listContainer = document.getElementById('list-container');
+        this.calendarContainer = document.getElementById('calendar-container');
+        this.calendarGrid = document.getElementById('calendar-grid');
+        this.calendarMonthLabel = document.getElementById('calendar-month-label');
+        this.calendarPrevBtn = document.getElementById('calendar-prev');
+        this.calendarNextBtn = document.getElementById('calendar-next');
+        this.calendarDayDetails = document.getElementById('calendar-day-details');
     }
 
     bindEvents() {
@@ -44,6 +58,30 @@ class UCLATodoApp {
                 this.handleSubmit(e);
             }
         });
+
+        // View toggles
+        if (this.viewListBtn && this.viewCalendarBtn) {
+            this.viewListBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.setView('list');
+            });
+            this.viewCalendarBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.setView('calendar');
+            });
+        }
+
+        // Calendar navigation
+        if (this.calendarPrevBtn && this.calendarNextBtn) {
+            this.calendarPrevBtn.addEventListener('click', () => {
+                this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+                this.renderCalendar();
+            });
+            this.calendarNextBtn.addEventListener('click', () => {
+                this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+                this.renderCalendar();
+            });
+        }
     }
 
     handleSubmit(e) {
@@ -51,6 +89,8 @@ class UCLATodoApp {
         
         const text = this.todoInput.value.trim();
         const priority = this.prioritySelect.value;
+        const dueDateLocal = this.dueDateInput ? this.dueDateInput.value : '';
+        const dueDateIso = dueDateLocal ? this.fromLocalDateTimeInputValue(dueDateLocal) : null;
         
         if (!text) {
             this.showNotification('Please enter a task!', 'warning');
@@ -63,36 +103,42 @@ class UCLATodoApp {
             priority: priority,
             completed: false,
             createdAt: new Date().toISOString(),
-            completedAt: null
+            completedAt: null,
+            dueDate: dueDateIso
         };
         
         this.todos.unshift(todo);
         this.saveTodos();
         this.renderTodos();
+        this.renderCalendar();
         this.updateStats();
         
         // Reset form
         this.todoInput.value = '';
         this.prioritySelect.value = 'medium';
+        if (this.dueDateInput) this.dueDateInput.value = '';
         this.todoInput.focus();
         
         this.showNotification('Task added successfully! Go Bruins! 🐻', 'success');
     }
 
     handleFilter(e) {
-        const filter = e.target.dataset.filter;
+        const filter = (e.currentTarget && e.currentTarget.dataset.filter) || (e.target.closest('button[data-filter]')?.dataset.filter);
+        if (!filter) return;
         
         // Update active button
         this.filterButtons.forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
+        (e.currentTarget || e.target.closest('button[data-filter]')).classList.add('active');
         
         this.currentFilter = filter;
         this.renderTodos();
+        if (this.currentView === 'calendar') this.renderCalendar();
     }
 
     handleSort(e) {
         this.currentSort = e.target.value;
         this.renderTodos();
+        if (this.currentView === 'calendar') this.renderCalendar();
     }
 
     toggleTodo(id) {
@@ -102,6 +148,7 @@ class UCLATodoApp {
             todo.completedAt = todo.completed ? new Date().toISOString() : null;
             this.saveTodos();
             this.renderTodos();
+            this.renderCalendar();
             this.updateStats();
             
             const message = todo.completed ? 'Task completed! Great job, Bruin! 🎉' : 'Task marked as pending';
@@ -115,6 +162,7 @@ class UCLATodoApp {
             this.todos = this.todos.filter(t => t.id !== id);
             this.saveTodos();
             this.renderTodos();
+            this.renderCalendar();
             this.updateStats();
             this.showNotification('Task deleted!', 'info');
         }
@@ -123,14 +171,74 @@ class UCLATodoApp {
     editTodo(id) {
         const todo = this.todos.find(t => t.id === id);
         if (!todo) return;
-        
-        const newText = prompt('Edit your task:', todo.text);
-        if (newText !== null && newText.trim() !== '') {
-            todo.text = newText.trim();
+
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 2000;
+        `;
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 20px; width: min(520px, 92vw);
+        `;
+        modal.innerHTML = `
+            <h3 style="margin-bottom: 12px; color: var(--ucla-blue);">Edit Task</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <label style="display:flex; flex-direction:column; gap:6px;">
+                    <span style="font-weight:600;">Text</span>
+                    <input id="edit-text" type="text" value="${this.escapeHtml(todo.text)}" style="padding:10px; border:2px solid var(--light-gray); border-radius:8px;">
+                </label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <label style="display:flex; flex-direction:column; gap:6px;">
+                        <span style="font-weight:600;">Priority</span>
+                        <select id="edit-priority" style="padding:10px; border:2px solid var(--light-gray); border-radius:8px;">
+                            <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low</option>
+                            <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                            <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High</option>
+                        </select>
+                    </label>
+                    <label style="display:flex; flex-direction:column; gap:6px;">
+                        <span style="font-weight:600;">Due</span>
+                        <input id="edit-due" type="datetime-local" value="${todo.dueDate ? this.toLocalDateTimeInputValue(todo.dueDate) : ''}" style="padding:10px; border:2px solid var(--light-gray); border-radius:8px;">
+                    </label>
+                </div>
+                <label style="display:flex; align-items:center; gap:10px;">
+                    <input id="edit-completed" type="checkbox" ${todo.completed ? 'checked' : ''}>
+                    <span>Completed</span>
+                </label>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top: 8px;">
+                    <button id="edit-cancel" class="filter-btn" style="border-color: var(--gray); color: var(--gray);">Cancel</button>
+                    <button id="edit-save" class="filter-btn active">Save</button>
+                </div>
+            </div>
+        `;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const close = () => { if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); };
+        modal.querySelector('#edit-cancel').addEventListener('click', (e) => { e.preventDefault(); close(); });
+        modal.querySelector('#edit-save').addEventListener('click', (e) => {
+            e.preventDefault();
+            const newText = modal.querySelector('#edit-text').value.trim();
+            const newPriority = modal.querySelector('#edit-priority').value;
+            const newDueLocal = modal.querySelector('#edit-due').value;
+            const newCompleted = modal.querySelector('#edit-completed').checked;
+            if (!newText) {
+                this.showNotification('Task text cannot be empty', 'warning');
+                return;
+            }
+            todo.text = newText;
+            todo.priority = newPriority;
+            todo.dueDate = newDueLocal ? this.fromLocalDateTimeInputValue(newDueLocal) : null;
+            todo.completed = newCompleted;
+            todo.completedAt = newCompleted ? (todo.completedAt || new Date().toISOString()) : null;
             this.saveTodos();
             this.renderTodos();
+            this.renderCalendar();
+            this.updateStats();
             this.showNotification('Task updated!', 'success');
-        }
+            close();
+        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     }
 
     getFilteredTodos() {
@@ -157,6 +265,13 @@ class UCLATodoApp {
                 break;
             case 'alphabetical':
                 filtered.sort((a, b) => a.text.localeCompare(b.text));
+                break;
+            case 'dueDate':
+                filtered.sort((a, b) => {
+                    const aTime = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+                    const bTime = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+                    return aTime - bTime;
+                });
                 break;
             case 'date':
             default:
@@ -191,13 +306,16 @@ class UCLATodoApp {
     }
 
     createTodoElement(todo) {
-        const date = new Date(todo.createdAt);
-        const formattedDate = date.toLocaleDateString('en-US', { 
+        const createdAt = new Date(todo.createdAt);
+        const formattedCreatedAt = createdAt.toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         });
+        const dueDate = todo.dueDate ? new Date(todo.dueDate) : null;
+        const isOverdue = dueDate && !todo.completed && (dueDate.getTime() < Date.now());
+        const formattedDue = dueDate ? dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         
         const priorityClass = todo.priority;
         const priorityText = todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1);
@@ -210,9 +328,10 @@ class UCLATodoApp {
                     <div class="todo-meta">
                         <div class="todo-date">
                             <i class="fas fa-calendar-alt"></i>
-                            ${formattedDate}
+                            ${formattedCreatedAt}
                         </div>
                         <div class="todo-priority ${priorityClass}">${priorityText}</div>
+                        ${formattedDue ? `<div class="todo-due ${isOverdue ? 'overdue' : ''}"><i class="fas fa-clock"></i> ${formattedDue}</div>` : ''}
                     </div>
                 </div>
                 <div class="todo-actions">
@@ -250,6 +369,7 @@ class UCLATodoApp {
         this.filterButtons.forEach(btn => btn.classList.remove('active'));
         this.filterButtons[0].classList.add('active');
         this.renderTodos();
+        if (this.currentView === 'calendar') this.renderCalendar();
     }
 
     showNotification(message, type = 'info') {
@@ -328,6 +448,7 @@ class UCLATodoApp {
             this.todos = [];
             this.saveTodos();
             this.renderTodos();
+            this.renderCalendar();
             this.updateStats();
             this.showNotification('All tasks cleared!', 'info');
         }
@@ -361,6 +482,7 @@ class UCLATodoApp {
                             this.todos = importedTodos;
                             this.saveTodos();
                             this.renderTodos();
+                            this.renderCalendar();
                             this.updateStats();
                             this.showNotification('Todos imported successfully!', 'success');
                         } else {
@@ -374,6 +496,140 @@ class UCLATodoApp {
             }
         };
         input.click();
+    }
+
+    // -------- View and Calendar Methods --------
+    setView(view) {
+        if (view !== 'list' && view !== 'calendar') return;
+        this.currentView = view;
+        if (this.listContainer && this.calendarContainer) {
+            this.listContainer.style.display = view === 'list' ? '' : 'none';
+            this.calendarContainer.style.display = view === 'calendar' ? '' : 'none';
+        }
+        if (this.viewListBtn && this.viewCalendarBtn) {
+            this.viewListBtn.classList.toggle('active', view === 'list');
+            this.viewCalendarBtn.classList.toggle('active', view === 'calendar');
+        }
+        if (view === 'calendar') {
+            this.renderCalendar();
+        }
+    }
+
+    renderCalendar() {
+        if (!this.calendarGrid) return;
+
+        // Clear grid
+        this.calendarGrid.innerHTML = '';
+        this.calendarDayDetails.innerHTML = '';
+
+        const year = this.currentMonth.getFullYear();
+        const monthIndex = this.currentMonth.getMonth();
+        const firstOfMonth = new Date(year, monthIndex, 1);
+        const firstWeekday = firstOfMonth.getDay(); // 0..6 (Sun..Sat)
+        const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+        // Month label
+        if (this.calendarMonthLabel) {
+            const monthName = firstOfMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            this.calendarMonthLabel.textContent = monthName;
+        }
+
+        // Weekday headers
+        const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        for (const name of weekdayNames) {
+            const headerCell = document.createElement('div');
+            headerCell.className = 'calendar-weekday';
+            headerCell.textContent = name;
+            this.calendarGrid.appendChild(headerCell);
+        }
+
+        // Leading empty cells
+        for (let i = 0; i < firstWeekday; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendar-cell empty';
+            this.calendarGrid.appendChild(emptyCell);
+        }
+
+        // Day cells
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cellDate = new Date(year, monthIndex, day);
+            const tasksDue = this.getTodosDueOnDate(cellDate).filter(t => !t.completed);
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell';
+            if (this.isSameDate(cellDate, new Date())) {
+                cell.classList.add('today');
+            }
+            const dateNumber = document.createElement('div');
+            dateNumber.className = 'date-number';
+            dateNumber.textContent = String(day);
+            cell.appendChild(dateNumber);
+
+            if (tasksDue.length > 0) {
+                const badge = document.createElement('div');
+                badge.className = 'calendar-badge';
+                badge.textContent = `${tasksDue.length} due`;
+                cell.appendChild(badge);
+            }
+
+            cell.addEventListener('click', () => {
+                this.renderCalendarDayDetails(cellDate);
+            });
+
+            this.calendarGrid.appendChild(cell);
+        }
+    }
+
+    renderCalendarDayDetails(dateObj) {
+        if (!this.calendarDayDetails) return;
+        const tasks = this.getTodosDueOnDate(dateObj);
+        const friendly = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        if (tasks.length === 0) {
+            this.calendarDayDetails.innerHTML = `<div class="empty-state"><div class="empty-content"><h3>No tasks due on ${friendly}</h3></div></div>`;
+            return;
+        }
+        const listHtml = tasks
+            .sort((a, b) => {
+                const at = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+                const bt = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+                return at - bt;
+            })
+            .map(t => this.createTodoElement(t))
+            .join('');
+        this.calendarDayDetails.innerHTML = `
+            <div style="margin-bottom:8px; font-weight:700; color: var(--ucla-blue);">Tasks due on ${friendly}</div>
+            <ul class="todo-list">${listHtml}</ul>
+        `;
+    }
+
+    getTodosDueOnDate(dateObj) {
+        return this.todos.filter(t => {
+            if (!t.dueDate) return false;
+            const d = new Date(t.dueDate);
+            return this.isSameDate(d, dateObj);
+        });
+    }
+
+    isSameDate(a, b) {
+        return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    toLocalDateTimeInputValue(isoString) {
+        try {
+            const d = new Date(isoString);
+            const tzAdjusted = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+            return tzAdjusted.toISOString().slice(0, 16);
+        } catch {
+            return '';
+        }
+    }
+
+    fromLocalDateTimeInputValue(localValue) {
+        try {
+            const d = new Date(localValue);
+            return d.toISOString();
+        } catch {
+            return null;
+        }
     }
 }
 
@@ -390,7 +646,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 priority: "high",
                 completed: false,
                 createdAt: new Date().toISOString(),
-                completedAt: null
+                completedAt: null,
+                dueDate: null
             },
             {
                 id: Date.now() + 2,
@@ -398,7 +655,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 priority: "medium",
                 completed: false,
                 createdAt: new Date().toISOString(),
-                completedAt: null
+                completedAt: null,
+                dueDate: null
             },
             {
                 id: Date.now() + 3,
@@ -406,13 +664,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 priority: "low",
                 completed: false,
                 createdAt: new Date().toISOString(),
-                completedAt: null
+                completedAt: null,
+                dueDate: null
             }
         ];
         
         app.todos = sampleTodos;
         app.saveTodos();
         app.renderTodos();
+        app.renderCalendar();
         app.updateStats();
     }
 });
